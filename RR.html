@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        function criar_linha(){
+            document.getElementById("tarefas") //referencia o body
+            let t = document.getElementById("tarefas") // temos t que é referencia a tarefas
+            document.createElement("tr") //Criamos um elemento. Ele existe, mas ainda não tá no documento
+            let tr = document.createElement("tr") //Esse elemento tr existe, mas ainda não está no documento,apenas adicionamos ele a uma variável. 
+            t.append(tr) //O tr tava só flutuando... fazendo o append estamos amarrando o tr como o último filho do body.
+            //O innerHTML nos poupa de ficar dando vários appends
+            tr.innerHTML=`<td>   
+                        <input type="number">  
+                    </td>
+                    <td>
+                        <input type="number"> 
+                    </td>
+                    <td>
+                        <button onclick='apagar_linha(this)'>
+                            -
+                        </button>
+                    </td>` 
+        }
+            function apagar_linha(botao){
+                botao.parentElement.parentElement.remove()
+            }
+
+    </script>
+</head>
+<body>
+    <table>
+        <thead> 
+            <tr> <!-- linha inteira-->
+                <th>    <!-- uma célula do cabeçalho do input-->
+                    Ingresso |
+                </th>
+                <th>
+                    Duração |
+                </th>
+                <th>
+                    botões
+                </th>
+            </tr>
+        </thead>
+            <tbody id="tarefas">
+                <tr>
+                    <td>  <!-- td ou th podemos colocarmos ambos no mesmo lugar a única diferença é a estilização do th-->
+                        <input type="number">  <!-- th é uma célula e o td também -->
+                    </td>
+                    <td>
+                        <input value="666" type="number">  <!-- th é uma célula e o td também -->
+                    </td>
+                    <td>
+                        <button onclick="apagar_linha(this)">
+                            -
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input value="333" type="number">  <!-- th é uma célula e o td também -->
+                    </td>
+                    <td>
+                        <input value="555" type="number">  <!-- th é uma célula e o td também -->
+                    </td>
+                    <td>
+                        <button onclick="apagar_linha(this)">
+                            -
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td>
+                        <button onclick="criar_linha()"> <!-- estamos chamando a função usando o onclick. Dentro do onclick usamos js normal, qualquer comando-->
+                            Adicionar tarefa
+                            
+                        </button>
+                    </td>
+                    <td>
+                        
+                    </td>
+                    <td>
+                        
+                    </td>
+                </tr>
+            </tfoot>
+    </table>
+
+    
+</body>
+</html>
