@@ -28,6 +28,26 @@
                 botao.parentElement.parentElement.remove()
             }
 
+            function mostrar_resultado_RR(){
+                let tarefas = []
+                let tbody = document.getElementById('tarefas')  // uma função que precisamos chamar passando um parâmetro string como id. Isso retorna um objeto com referência ao tbody
+                for(let item of tbody.children){
+                    //console.log(item.querySelector()) //a função querySelector aceitar uma regra do css e nesse caso ele vai retornar o primeiro elemento filho de item que bater com a regra é assim que o css funciona, se quisessemos  o elemento tarefa a gente passava a função queryselector("#tarefas"), e ele retorna o próprio elemento tarefas dessa forma.
+                
+                    let inputs = item.querySelectorAll('input')
+
+                    let ingresso = inputs[0].value
+                    let Duração = inputs[1].value
+
+                    tarefas.push({ing: ingresso, dur: Duração} ) // estamos criando um objeto com {}, e dentro do objeto podemos podemos definir quais os atributos(no caso ing e dur) desse objeto irão ser criados
+                    
+
+
+                }
+                console.log({tarefas})
+            }
+
+            
     </script>
 </head>
 <body>
@@ -90,7 +110,9 @@
                 </tr>
             </tfoot>
     </table>
-
+    <button onclick="mostrar_resultado_RR()">
+        executar
+    </button>
     
 </body>
 </html>
