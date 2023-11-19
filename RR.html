@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+<meta charset="UTF-8">
+
 <head>
-    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <script>
-        function criar_linha(){
+        function criar_linha() {
             document.getElementById("tarefas") //referencia o body
             let t = document.getElementById("tarefas") // temos t que é referencia a tarefas
             document.createElement("tr") //Criamos um elemento. Ele existe, mas ainda não tá no documento
             let tr = document.createElement("tr") //Esse elemento tr existe, mas ainda não está no documento,apenas adicionamos ele a uma variável. 
             t.append(tr) //O tr tava só flutuando... fazendo o append estamos amarrando o tr como o último filho do body.
             //O innerHTML nos poupa de ficar dando vários appends
-            tr.innerHTML=`<td>   
+            tr.innerHTML = `<td>   
                         <input type="number">  
                     </td>
                     <td>
@@ -22,39 +23,98 @@
                         <button onclick='apagar_linha(this)'>
                             -
                         </button>
-                    </td>` 
+                    </td>`
         }
-            function apagar_linha(botao){
-                botao.parentElement.parentElement.remove()
+        function apagar_linha(botao) {
+            botao.parentElement.parentElement.remove()
+        }
+
+        function mostrar_resultado_RR() {
+            let tarefas = []
+            let tbody = document.getElementById('tarefas')  // uma função que precisamos chamar passando um parâmetro string como id. Isso retorna um objeto com referência ao tbody
+            for (let item of tbody.children) {
+                //console.log(item.querySelector()) //a função querySelector aceitar uma regra do css e nesse caso ele vai retornar o primeiro elemento filho de item que bater com a regra é assim que o css funciona, se quisessemos  o elemento tarefa a gente passava a função queryselector("#tarefas"), e ele retorna o próprio elemento tarefas dessa forma.
+
+                let inputs = item.querySelectorAll('input')
+
+                let ingresso = inputs[0].value
+                let Duração = inputs[1].value
+
+                tarefas.push({ ing: ingresso, dur: Duração }) // estamos criando um objeto com {}, e dentro do objeto podemos podemos definir quais os atributos(no caso ing e dur) desse objeto irão ser criados
+
+
+
             }
-
-            function mostrar_resultado_RR(){
-                let tarefas = []
-                let tbody = document.getElementById('tarefas')  // uma função que precisamos chamar passando um parâmetro string como id. Isso retorna um objeto com referência ao tbody
-                for(let item of tbody.children){
-                    //console.log(item.querySelector()) //a função querySelector aceitar uma regra do css e nesse caso ele vai retornar o primeiro elemento filho de item que bater com a regra é assim que o css funciona, se quisessemos  o elemento tarefa a gente passava a função queryselector("#tarefas"), e ele retorna o próprio elemento tarefas dessa forma.
-                
-                    let inputs = item.querySelectorAll('input')
-
-                    let ingresso = inputs[0].value
-                    let Duração = inputs[1].value
-
-                    tarefas.push({ing: ingresso, dur: Duração} ) // estamos criando um objeto com {}, e dentro do objeto podemos podemos definir quais os atributos(no caso ing e dur) desse objeto irão ser criados
-                    
-
-
-                }
-                console.log({tarefas})
-            }
-
+            console.log({ tarefas })
+            executar_RR(tarefas)    //Recebe os inputs e processa-os const input = [
+            /* [{"dur": 100, "ing": 100},
+            {"dur": 200, "ing": 40},
+            {"dur": 3400, "ing": 440},
+             ]
+        
+        [
+            {tarefa: "t4", tempo: 1},
+            {tarefa: "t4", tempo: 1},
+            {tarefa: "t2", tempo: 1},
+            {tarefa: "t4", tempo: 1},
+            {tarefa: "t2", tempo: 1},
+            {tarefa: "t3", tempo: 1},
+        ]
+         */
             
+        }
+        function executar_RR(tarefas) {
+            const input = [
+                { "dur": 100, "ing": 100 },
+                { "dur": 200, "ing": 40 },
+                { "dur": 3400, "ing": 440 },
+            ]
+
+            let indice_menor = 0;
+
+            for (let i = 1; i < input.length; i++) {
+                if (input[i].ing < input[indice_menor].ing) {
+                    indice_menor = i;
+                }
+            }
+
+            const quantum = 2 //Definindo o quantum
+
+            let list = []   //lista a ser executada
+            list.push(indice_menor) //colocando a primeira tarfa a ser executa na lista que ordena as tarefas a serem executadas
+
+            let tempo = 0
+
+            let output = []  //Definindo o array de output
+            
+            let menor = Math.min(quantum, input[list[0]].dur)  //nos retorna o menor valor dos argumentos
+
+            output.push({tarefa: list[0], tempo: menor})
+            let comeco = tempo
+            tempo += menor
+            let fim = tempo
+
+            indices_tarefas_ingressaram = []
+
+            for(let i = 0; i < input.length ; i++){
+                if(comeco < input[i].ing && fim >= input[i].ing){
+                    indices_tarefas_ingressaram.push(i)
+                }
+            }
+            indices_tarefas_ingressaram.sort((a, b) => input[a].ing - input[b].ing) //Ordenando não os índices, mas sim os valors dos ingressos
+            list.push(...indices_tarefas_ingressaram)
+            console.log(list)
+        }
+
+
     </script>
 </head>
+
 <body>
     <table>
-        <thead> 
+        <thead>
             <tr> <!-- linha inteira-->
-                <th>    <!-- uma célula do cabeçalho do input-->
+                <th> <!-- uma célula do cabeçalho do input-->
                     Ingresso |
                 </th>
                 <th>
@@ -65,54 +125,56 @@
                 </th>
             </tr>
         </thead>
-            <tbody id="tarefas">
-                <tr>
-                    <td>  <!-- td ou th podemos colocarmos ambos no mesmo lugar a única diferença é a estilização do th-->
-                        <input type="number">  <!-- th é uma célula e o td também -->
-                    </td>
-                    <td>
-                        <input value="666" type="number">  <!-- th é uma célula e o td também -->
-                    </td>
-                    <td>
-                        <button onclick="apagar_linha(this)">
-                            -
-                        </button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <input value="333" type="number">  <!-- th é uma célula e o td também -->
-                    </td>
-                    <td>
-                        <input value="555" type="number">  <!-- th é uma célula e o td também -->
-                    </td>
-                    <td>
-                        <button onclick="apagar_linha(this)">
-                            -
-                        </button>
-                    </td>
-                </tr>
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td>
-                        <button onclick="criar_linha()"> <!-- estamos chamando a função usando o onclick. Dentro do onclick usamos js normal, qualquer comando-->
-                            Adicionar tarefa
-                            
-                        </button>
-                    </td>
-                    <td>
-                        
-                    </td>
-                    <td>
-                        
-                    </td>
-                </tr>
-            </tfoot>
+        <tbody id="tarefas">
+            <tr>
+                <td> <!-- td ou th podemos colocarmos ambos no mesmo lugar a única diferença é a estilização do th-->
+                    <input type="number"> <!-- th é uma célula e o td também -->
+                </td>
+                <td>
+                    <input value="666" type="number"> <!-- th é uma célula e o td também -->
+                </td>
+                <td>
+                    <button onclick="apagar_linha(this)">
+                        -
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input value="333" type="number"> <!-- th é uma célula e o td também -->
+                </td>
+                <td>
+                    <input value="555" type="number"> <!-- th é uma célula e o td também -->
+                </td>
+                <td>
+                    <button onclick="apagar_linha(this)">
+                        -
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td>
+                    <button onclick="criar_linha()">
+                        <!-- estamos chamando a função usando o onclick. Dentro do onclick usamos js normal, qualquer comando-->
+                        Adicionar tarefa
+
+                    </button>
+                </td>
+                <td>
+
+                </td>
+                <td>
+
+                </td>
+            </tr>
+        </tfoot>
     </table>
     <button onclick="mostrar_resultado_RR()">
         executar
     </button>
-    
+
 </body>
+
 </html>
