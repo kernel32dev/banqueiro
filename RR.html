@@ -61,15 +61,17 @@
             {tarefa: "t3", tempo: 1},
         ]
          */
-            
+
         }
         function executar_RR(tarefas) {
             const input = [
-                { "dur": 100, "ing": 100 },
-                { "dur": 200, "ing": 40 },
-                { "dur": 3400, "ing": 440 },
+                { "dur": 4, "ing": 4 },
+                { "dur": 2, "ing": 1 },
+                { "dur": 5, "ing": 3 },
+                { "dur": 3, "ing": 0}
             ]
 
+            //Variável que vai guardar o índice da tarefa de menor ingresso
             let indice_menor = 0;
 
             for (let i = 1; i < input.length; i++) {
@@ -78,34 +80,61 @@
                 }
             }
 
-            const quantum = 2 //Definindo o quantum
+            //O tempo máximo que cada tarefa pode ser executada por vez
+            const quantum = 1   
 
-            let list = []   //lista a ser executada
+            //A fila atual de tarefas que muda ao longo da execução
+            let list = []   
             list.push(indice_menor) //colocando a primeira tarfa a ser executa na lista que ordena as tarefas a serem executadas
 
             let tempo = 0
 
             let output = []  //Definindo o array de output
-            
-            let menor = Math.min(quantum, input[list[0]].dur)  //nos retorna o menor valor dos argumentos
 
-            output.push({tarefa: list[0], tempo: menor})
-            let comeco = tempo
-            tempo += menor
-            let fim = tempo
+            while(true){
+                //Calcula quanto tempo a gente vai executar a próxima tarefa
+                let menor = Math.min(quantum, input[list[0]].dur)  //nos retorna o menor valor dos argumentos
 
-            indices_tarefas_ingressaram = []
+                //Deduzindo do tempo de duração que foi executado
+                input[list[0]].dur -=  menor
 
-            for(let i = 0; i < input.length ; i++){
-                if(comeco < input[i].ing && fim >= input[i].ing){
-                    indices_tarefas_ingressaram.push(i)
+                //Executar, o output são os que foram executados, é tipo um relatório das tarefas que foram executadas
+                output.push({ tarefa: list[0], tempo: menor })
+                //Definindo o avanço do tempo que vai útil pra ser usado para identificar as tarefas que ingressaram
+                let comeco = tempo
+                tempo += menor
+                let fim = tempo
+
+                //Colocar a tarefa que acabou de ser executada no fim da fila.
+                variavel_removida = list.shift()
+
+                if(input[variavel_removida].dur != 0){
+                    list.push(variavel_removida)
                 }
-            }
-            indices_tarefas_ingressaram.sort((a, b) => input[a].ing - input[b].ing) //Ordenando não os índices, mas sim os valors dos ingressos
-            list.push(...indices_tarefas_ingressaram)
-            console.log(list)
-        }
 
+                indices_tarefas_ingressaram = []
+
+                //Adicionando as tarefas que ingressaram em um vetor vazio.
+                for (let i = 0; i < input.length; i++) {
+                    if (comeco < input[i].ing && fim >= input[i].ing) {
+                        indices_tarefas_ingressaram.push(i)
+                    }
+                }
+                //Ordenando as tarefas por ordem de ingresso
+                indices_tarefas_ingressaram.sort((a, b) => input[a].ing - input[b].ing) //Ordenando não os índices, mas sim os valors dos ingressos
+                list.push(...indices_tarefas_ingressaram)
+                console.log(list)
+
+                if(list.length === 0){
+                    break
+                }
+                
+            }
+            console.log(output)
+            
+
+
+        }
 
     </script>
 </head>
