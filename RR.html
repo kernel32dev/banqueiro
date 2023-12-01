@@ -5,6 +5,19 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        table.res {
+            border-collapse: collapse;
+        }
+
+        table.res th,
+        table.res td {
+            border: 1px solid black;
+        }
+        .executando{
+            background-color: yellow;
+        }
+    </style>
     <script>
         function criar_linha() {
             document.getElementById("tarefas") //referencia o body
@@ -24,6 +37,7 @@
                             -
                         </button>
                     </td>`
+
         }
         function apagar_linha(botao) {
             botao.parentElement.parentElement.remove()
@@ -63,12 +77,51 @@
          */
 
         }
+
+        function mostrar_RR(output, qtd_tarefas) {
+            let mostrar = document.getElementById("output")
+            let tempos = ''
+            var arr = Array(qtd_tarefas).fill(``); //var arr = Array(arraySize).fill(value) criando um array de strings vazias
+            for(let i = 0; i < qtd_tarefas; i++){
+                arr[i] += `<td>${i}</td>` 
+
+            }
+            for (let i = 0; i < output.length; ++i) {
+                
+                tempos += `<th class = "tempo" width = "${20 * output[i].tempo}">${output[i].tempo}</th>`
+                for (let j = 0 ; j < qtd_tarefas; ++j) {
+                    let tarefa_executa = output[i].tarefa
+                    if(tarefa_executa === j){
+                        arr[j] += `<td class = "executando" width = "${20 * output[i].tempo}"></td>` //width: largura do td em pixels //`${20 * output[i].tempo}` string tamplate = print(f"") no python, que a gente pode atribuir valores nelas 
+                    }else{
+                        arr[j] += `<td class = "esperando" width = "${20 * output[i].tempo}"></td>` //width: largura do td em pixels //`${20 * output[i].tempo}` string tamplate = print(f"") no python, que a gente pode atribuir valores nelas 
+                    }
+                }
+            }
+            mostrar.innerHTML =
+                `<table>
+                <thead>  
+                    <tr>
+                        <th>
+
+                        </th>
+                        ${tempos}
+                    </tr>       
+                </thead>
+                <tbody>
+                    ${arr.map(x => `<tr>`+x+`</tr>`).join(``)} 
+                </tbody>    
+            </table>`
+        }
+
+
+
         function executar_RR(tarefas) {
             const input = [
                 { "dur": 4, "ing": 4 },
                 { "dur": 2, "ing": 1 },
                 { "dur": 5, "ing": 3 },
-                { "dur": 3, "ing": 0}
+                { "dur": 3, "ing": 0 }
             ]
 
             //Variável que vai guardar o índice da tarefa de menor ingresso
@@ -81,22 +134,22 @@
             }
 
             //O tempo máximo que cada tarefa pode ser executada por vez
-            const quantum = 1   
+            const quantum = 1
 
             //A fila atual de tarefas que muda ao longo da execução
-            let list = []   
+            let list = []
             list.push(indice_menor) //colocando a primeira tarfa a ser executa na lista que ordena as tarefas a serem executadas
 
             let tempo = 0
 
             let output = []  //Definindo o array de output
 
-            while(true){
+            while (true) {
                 //Calcula quanto tempo a gente vai executar a próxima tarefa
                 let menor = Math.min(quantum, input[list[0]].dur)  //nos retorna o menor valor dos argumentos
 
                 //Deduzindo do tempo de duração que foi executado
-                input[list[0]].dur -=  menor
+                input[list[0]].dur -= menor
 
                 //Executar, o output são os que foram executados, é tipo um relatório das tarefas que foram executadas
                 output.push({ tarefa: list[0], tempo: menor })
@@ -108,7 +161,7 @@
                 //Colocar a tarefa que acabou de ser executada no fim da fila.
                 variavel_removida = list.shift()
 
-                if(input[variavel_removida].dur != 0){
+                if (input[variavel_removida].dur != 0) {
                     list.push(variavel_removida)
                 }
 
@@ -125,14 +178,16 @@
                 list.push(...indices_tarefas_ingressaram)
                 console.log(list)
 
-                if(list.length === 0){
+                if (list.length === 0) {
                     break
                 }
-                
+
             }
             console.log(output)
-            
 
+            const qtd_tarefas = input.length
+
+            mostrar_RR(output, qtd_tarefas)
 
         }
 
@@ -203,7 +258,36 @@
     <button onclick="mostrar_resultado_RR()">
         executar
     </button>
+    <div id="output">
+        <br>
+        <!--<table class="res">
+        <thead>
+            <tr>
+                <th>
 
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    t1
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    t2
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    t3
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    -->
+    </div>
 </body>
 
 </html>
