@@ -17,6 +17,8 @@
         .executando{
             background-color: yellow;
         }
+        table.res th {text-align: right;} /* as regras do css é complementamente diferente do js, ou seja, o . não faz acesso por assim dizer */ 
+        table.res td {text-align: center;}
     </style>
     <script>
         function criar_linha() {
@@ -86,20 +88,21 @@
                 arr[i] += `<td>${i}</td>` 
 
             }
+            let tempo_atual = 0
             for (let i = 0; i < output.length; ++i) {
-                
-                tempos += `<th class = "tempo" width = "${20 * output[i].tempo}">${output[i].tempo}</th>`
+                tempo_atual += output[i].tempo  
+                tempos += `<th class = "tempo" width = "${20 * output[i].tempo}">${tempo_atual}</th>`
                 for (let j = 0 ; j < qtd_tarefas; ++j) {
                     let tarefa_executa = output[i].tarefa
                     if(tarefa_executa === j){
-                        arr[j] += `<td class = "executando" width = "${20 * output[i].tempo}"></td>` //width: largura do td em pixels //`${20 * output[i].tempo}` string tamplate = print(f"") no python, que a gente pode atribuir valores nelas 
+                        arr[j] += `<td class = "executando" width = "${20 * output[i].tempo}">${output[i].tempo}</td>` //${} só funciona com strings de `` //width: largura do td em pixels //`${20 * output[i].tempo}` string tamplate = print(f"") no python, que a gente pode atribuir valores nelas 
                     }else{
                         arr[j] += `<td class = "esperando" width = "${20 * output[i].tempo}"></td>` //width: largura do td em pixels //`${20 * output[i].tempo}` string tamplate = print(f"") no python, que a gente pode atribuir valores nelas 
                     }
                 }
             }
             mostrar.innerHTML =
-                `<table>
+                `<table class = "res">
                 <thead>  
                     <tr>
                         <th>
@@ -117,12 +120,7 @@
 
 
         function executar_RR(tarefas) {
-            const input = [
-                { "dur": 4, "ing": 4 },
-                { "dur": 2, "ing": 1 },
-                { "dur": 5, "ing": 3 },
-                { "dur": 3, "ing": 0 }
-            ]
+            const input = tarefas
 
             //Variável que vai guardar o índice da tarefa de menor ingresso
             let indice_menor = 0;
@@ -132,10 +130,14 @@
                     indice_menor = i;
                 }
             }
-
+            if(input[indice_menor].ing != 0){
+                alert("Digite o ingrensso com valor 0!")
+                return []         
+            }
             //O tempo máximo que cada tarefa pode ser executada por vez
-            const quantum = 1
-
+            const quantum = Number(document.getElementById("quantum").value) //document.getElementById("quantum") está retornando um objeto que representa o input no documento... e esse objeto é "mágico" no sentido de que não podemos criar essa função, assim como não conseguimos criar uma função console.log//poderia ser const quantum = document["getElementById"]("quantum"), ou com o . pegamos uma propriedade de um objeto, sendo essa propriedade uma função, um número, um outro objeto(quando temos um vetor dentro de um vetor)
+            //[0][0] nesse caso primeiro colchete define um array, e o segundo define o valor do posição 0(nesse caso, nos retornaria 0), agora {"dur": 3}["dur"] nesse caso a gente tá definindo um objeto com a propriedade duração pelos {} e com um valor 3 pelos : . E estamos acessando essa valor via []. também poderíamos passar {"dur+!"}[]
+            //Os itens de um array são guardados na propriedade daquele objeto, a propriedade 0 de um vetor [a, b, c] é o a, asim como document tem a propriedade getElementById, arrays tem propriedades que é o indíce dela.
             //A fila atual de tarefas que muda ao longo da execução
             let list = []
             list.push(indice_menor) //colocando a primeira tarfa a ser executa na lista que ordena as tarefas a serem executadas
@@ -149,7 +151,7 @@
                 let menor = Math.min(quantum, input[list[0]].dur)  //nos retorna o menor valor dos argumentos
 
                 //Deduzindo do tempo de duração que foi executado
-                input[list[0]].dur -= menor
+                input[list[0]].dur -= menor //input[list[0]]["dur"]
 
                 //Executar, o output são os que foram executados, é tipo um relatório das tarefas que foram executadas
                 output.push({ tarefa: list[0], tempo: menor })
@@ -212,10 +214,10 @@
         <tbody id="tarefas">
             <tr>
                 <td> <!-- td ou th podemos colocarmos ambos no mesmo lugar a única diferença é a estilização do th-->
-                    <input type="number"> <!-- th é uma célula e o td também -->
+                    <input value="0" type="number"> <!-- th é uma célula e o td também -->
                 </td>
                 <td>
-                    <input value="666" type="number"> <!-- th é uma célula e o td também -->
+                    <input value="10" type="number"> <!-- th é uma célula e o td também -->
                 </td>
                 <td>
                     <button onclick="apagar_linha(this)">
@@ -225,10 +227,10 @@
             </tr>
             <tr>
                 <td>
-                    <input value="333" type="number"> <!-- th é uma célula e o td também -->
+                    <input value="4" type="number"> <!-- th é uma célula e o td também -->
                 </td>
                 <td>
-                    <input value="555" type="number"> <!-- th é uma célula e o td também -->
+                    <input value="13" type="number"> <!-- th é uma célula e o td também -->
                 </td>
                 <td>
                     <button onclick="apagar_linha(this)">
@@ -258,7 +260,8 @@
     <button onclick="mostrar_resultado_RR()">
         executar
     </button>
-    <div id="output">
+    <br><label for="quantum">quantum</label><br><input id ="quantum" type="number" value="1" placeholder="quantum">  <!-- atributos sempre são strings, ou seja, sempre vêm dentro de aspas sem exceções-->
+    <div id="output"> 
         <br>
         <!--<table class="res">
         <thead>
