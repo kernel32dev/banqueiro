@@ -25,6 +25,12 @@
             text-align: right;
             padding: 0px 4px;
         }
+        #output {
+            margin: 0 auto;
+        }
+        #output_msg {
+            text-align: center;
+        }
     </style>
     <script>
         function assert(assertion) {
@@ -80,25 +86,35 @@
             while (true) {
                 let disponiveis_tr = disponiveis.map(x => `<td>${x}</td>`).join("");
                 tr_eventos += `<tr><th></th>${disponiveis_tr}</tr>`;
-                // encontra primeira tarefa que requer apenas o que eu tenho
                 let prox_executar = quer.findIndex(
                     (requerimentos, i) => !concluido[i] && requerimentos.every(
                         (requerimento, j) => requerimento <= disponiveis[j]
                     )
                 );
                 if (prox_executar == -1) {
-                    // nenhum pode executar, dead lock
                     break;
                 } else {
+                    let removidos = quer[prox_executar].map(x => `<td>-${x}</td>`).join("");
+                    let intermediario = disponiveis.map((x, i) => `<td>${x - quer[prox_executar][i]}</td>`).join("");
+                    let adicionados = tem[prox_executar].map((x, i) => `<td>+${x + quer[prox_executar][i]}</td>`).join("");
+                    tr_eventos += `<tr><th>${prox_executar} Começa</th>${removidos}</tr>`;
+                    tr_eventos += `<tr><th>${prox_executar} Executando</th>${intermediario}</tr>`;
+                    tr_eventos += `<tr><th>${prox_executar} Termina</th>${adicionados}</tr>`;
                     concluido[prox_executar] = true;
                     tem[prox_executar].forEach((tem, i) => disponiveis[i] += tem);
-                    let removidos = quer[prox_executar].map(x => `<td>-${x}</td>`).join("");
-                    let adicionados = tem[prox_executar].map((x, i) => `<td>+${x + quer[prox_executar][i]}</td>`).join("");
-                    tr_eventos += `<tr><th>Tarefa ${prox_executar} Executa</th>${removidos}</tr>`;
-                    tr_eventos += `<tr><th>Tarefa ${prox_executar} Termina</th>${adicionados}</tr>`;
                 }
             }
+            let tarefas_deadlock = concluido.flatMap((x, i) => x ? [] : [i]);
+            let msg = "";
+            if (tarefas_deadlock.length === 0) {
+                msg = "Todas as tarefas foram executadas, estado seguro";
+            } else if (tarefas_deadlock.length === 1) {
+                msg = `DEADLOCK, a tarefa ${tarefas_deadlock[0]} não foi executada`;
+            } else {
+                msg = `DEADLOCK, as tarefas ${tarefas_deadlock.join(", ")} não foram executadas`;
+            }
             document.getElementById("output").innerHTML = `<thead><tr><th>Evento</th>${header_recursos}</tr></thead><tbody>${tr_eventos}</tbody>`;
+            document.getElementById("output_msg").innerText = msg;
         }
         document.addEventListener("DOMContentLoaded", executa);
     </script>
@@ -209,6 +225,8 @@
     </div>
     <div>
         <table id="output"></table>
+        <br>
+        <h3 id="output_msg"></h3>
     </div>
 </body>
 
