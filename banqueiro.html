@@ -3,293 +3,212 @@
 <meta charset="UTF-8">
 
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
     <style>
-        table.res {
-            border-collapse: collapse;
+        * {
+            margin: 0;
+            padding: 0;
+            flex-grow: 0;
+            flex-shrink: 0;
         }
-
-        table.res th,
-        table.res td {
-            border: 1px solid black;
+        input {
+            max-width: 4em;
         }
-        .executando{
-            background-color: yellow;
+        body {
+            display: flex;
+            flex-direction: row;
         }
-        table.res th {text-align: right;} /* as regras do css é complementamente diferente do js, ou seja, o . não faz acesso por assim dizer */ 
-        table.res td {text-align: center;}
+        body > div {
+            flex-grow: 1;
+            padding: 30px;
+        }
+        table#output td {
+            text-align: right;
+            padding: 0px 4px;
+        }
     </style>
     <script>
-        function criar_linha() {
-            document.getElementById("tarefas") //referencia o body
-            let t = document.getElementById("tarefas") // temos t que é referencia a tarefas
-            document.createElement("tr") //Criamos um elemento. Ele existe, mas ainda não tá no documento
-            let tr = document.createElement("tr") //Esse elemento tr existe, mas ainda não está no documento,apenas adicionamos ele a uma variável. 
-            t.append(tr) //O tr tava só flutuando... fazendo o append estamos amarrando o tr como o último filho do body.
-            //O innerHTML nos poupa de ficar dando vários appends
-            tr.innerHTML = `<td>   
-                        <input type="number">  
-                    </td>
-                    <td>
-                        <input type="number"> 
-                    </td>
-                    <td>
-                        <button onclick='apagar_linha(this)'>
-                            -
-                        </button>
-                    </td>`
-
+        function assert(assertion) {
+            if (!assertion) throw new Error("assert falhou");
         }
-        function apagar_linha(botao) {
-            botao.parentElement.parentElement.remove()
+        function refaz_inputs() {
+            let quant_recursos = Number(document.getElementById("quant_recursos").value);
+            let quant_tarefas = Number(document.getElementById("quant_tarefas").value);
+            let tables = ["matriz_tem", "matriz_quer"];
+            let inputs = '<td><input type="number" value="0" oninput="executa()"></td>'.repeat(quant_recursos);
+            let recursos = "";
+            for (let i = 0; i < quant_recursos; i++) {
+                recursos += `<th>${String.fromCharCode(65 + i)}</th>`
+            }
+            let tarefas = "";
+            for (let i = 0; i < quant_tarefas; i++) {
+                tarefas += `<tr><th>${i}</th>${inputs}</tr>`
+            }
+            for (let table_id of tables) {
+                let table = document.getElementById(table_id);
+                table.innerHTML = `<thead><tr><th></th>${recursos}</tr></thead><tbody>${tarefas}</tbody>`;
+            }
+            document.getElementById("recursos_trhead").innerHTML = recursos;
+            document.getElementById("recursos_trbody").innerHTML = inputs;
+            executa();
         }
-
-        function mostrar_resultado_RR() {
-            let tarefas = []
-            let tbody = document.getElementById('tarefas')  // uma função que precisamos chamar passando um parâmetro string como id. Isso retorna um objeto com referência ao tbody
-            for (let item of tbody.children) {
-                //console.log(item.querySelector()) //a função querySelector aceitar uma regra do css e nesse caso ele vai retornar o primeiro elemento filho de item que bater com a regra é assim que o css funciona, se quisessemos  o elemento tarefa a gente passava a função queryselector("#tarefas"), e ele retorna o próprio elemento tarefas dessa forma.
-
-                let inputs = item.querySelectorAll('input')
-
-                let ingresso = inputs[0].value
-                let Duração = inputs[1].value
-
-                tarefas.push({ ing: ingresso, dur: Duração }) // estamos criando um objeto com {}, e dentro do objeto podemos podemos definir quais os atributos(no caso ing e dur) desse objeto irão ser criados
-
-
-
-            }
-            console.log({ tarefas })
-            executar_RR(tarefas)    //Recebe os inputs e processa-os const input = [
-            /* [{"dur": 100, "ing": 100},
-            {"dur": 200, "ing": 40},
-            {"dur": 3400, "ing": 440},
-             ]
-        
-        [
-            {tarefa: "t4", tempo: 1},
-            {tarefa: "t4", tempo: 1},
-            {tarefa: "t2", tempo: 1},
-            {tarefa: "t4", tempo: 1},
-            {tarefa: "t2", tempo: 1},
-            {tarefa: "t3", tempo: 1},
-        ]
-         */
-
+        function ler_matriz(id) {
+            let tbody = document.getElementById(id).lastElementChild;
+            return Array.from(tbody.children).map(x =>
+                Array.from(x.children).slice(1).map(x =>
+                    Number(x.firstElementChild.value)
+                )
+            );
         }
-
-        function mostrar_RR(output, qtd_tarefas) {
-            let mostrar = document.getElementById("output")
-            let tempos = ''
-            var arr = Array(qtd_tarefas).fill(``); //var arr = Array(arraySize).fill(value) criando um array de strings vazias
-            for(let i = 0; i < qtd_tarefas; i++){
-                arr[i] += `<td>${i}</td>` 
-
+        function executa() {
+            let quant_recursos = Number(document.getElementById("quant_recursos").value);
+            let quant_tarefas = Number(document.getElementById("quant_tarefas").value);
+            let header_recursos = "";
+            for (let i = 0; i < quant_recursos; i++) {
+                header_recursos += `<th>${String.fromCharCode(65 + i)}</th>`
             }
-            let tempo_atual = 0
-            for (let i = 0; i < output.length; ++i) {
-                tempo_atual += output[i].tempo  
-                tempos += `<th class = "tempo" width = "${20 * output[i].tempo}">${tempo_atual}</th>`
-                for (let j = 0 ; j < qtd_tarefas; ++j) {
-                    let tarefa_executa = output[i].tarefa
-                    if(tarefa_executa === j){
-                        arr[j] += `<td class = "executando" width = "${20 * output[i].tempo}">${output[i].tempo}</td>` //${} só funciona com strings de `` //width: largura do td em pixels //`${20 * output[i].tempo}` string tamplate = print(f"") no python, que a gente pode atribuir valores nelas 
-                    }else{
-                        arr[j] += `<td class = "esperando" width = "${20 * output[i].tempo}"></td>` //width: largura do td em pixels //`${20 * output[i].tempo}` string tamplate = print(f"") no python, que a gente pode atribuir valores nelas 
-                    }
-                }
-            }
-            mostrar.innerHTML =
-                `<table class = "res">
-                <thead>  
-                    <tr>
-                        <th>
-
-                        </th>
-                        ${tempos}
-                    </tr>       
-                </thead>
-                <tbody>
-                    ${arr.map(x => `<tr>`+x+`</tr>`).join(``)} 
-                </tbody>    
-            </table>`
-        }
-
-
-
-        function executar_RR(tarefas) {
-            const input = tarefas
-
-            //Variável que vai guardar o índice da tarefa de menor ingresso
-            let indice_menor = 0;
-
-            for (let i = 1; i < input.length; i++) {
-                if (input[i].ing < input[indice_menor].ing) {
-                    indice_menor = i;
-                }
-            }
-            if(input[indice_menor].ing != 0){
-                alert("Digite o ingrensso com valor 0!")
-                return []         
-            }
-            //O tempo máximo que cada tarefa pode ser executada por vez
-            const quantum = Number(document.getElementById("quantum").value) //document.getElementById("quantum") está retornando um objeto que representa o input no documento... e esse objeto é "mágico" no sentido de que não podemos criar essa função, assim como não conseguimos criar uma função console.log//poderia ser const quantum = document["getElementById"]("quantum"), ou com o . pegamos uma propriedade de um objeto, sendo essa propriedade uma função, um número, um outro objeto(quando temos um vetor dentro de um vetor)
-            //[0][0] nesse caso primeiro colchete define um array, e o segundo define o valor do posição 0(nesse caso, nos retornaria 0), agora {"dur": 3}["dur"] nesse caso a gente tá definindo um objeto com a propriedade duração pelos {} e com um valor 3 pelos : . E estamos acessando essa valor via []. também poderíamos passar {"dur+!"}[]
-            //Os itens de um array são guardados na propriedade daquele objeto, a propriedade 0 de um vetor [a, b, c] é o a, asim como document tem a propriedade getElementById, arrays tem propriedades que é o indíce dela.
-            //A fila atual de tarefas que muda ao longo da execução
-            let list = []
-            list.push(indice_menor) //colocando a primeira tarfa a ser executa na lista que ordena as tarefas a serem executadas
-
-            let tempo = 0
-
-            let output = []  //Definindo o array de output
-
+            let tr_eventos = "";
+            let recursos_trbody = document.getElementById("recursos_trbody");
+            let tem = ler_matriz("matriz_tem");
+            let quer = ler_matriz("matriz_quer");
+            let concluido = Array(quant_tarefas).fill(false);
+            let disponiveis = Array.from(recursos_trbody.children).map(x => Number(x.firstElementChild.value));
+            assert(tem.length == quant_tarefas);
+            assert(tem.every(x => x.length == quant_recursos));
+            assert(quer.length == quant_tarefas);
+            assert(quer.every(x => x.length == quant_recursos));
+            assert(disponiveis.length == quant_recursos);
             while (true) {
-                //Calcula quanto tempo a gente vai executar a próxima tarefa
-                let menor = Math.min(quantum, input[list[0]].dur)  //nos retorna o menor valor dos argumentos
-
-                //Deduzindo do tempo de duração que foi executado
-                input[list[0]].dur -= menor //input[list[0]]["dur"]
-
-                //Executar, o output são os que foram executados, é tipo um relatório das tarefas que foram executadas
-                output.push({ tarefa: list[0], tempo: menor })
-                //Definindo o avanço do tempo que vai útil pra ser usado para identificar as tarefas que ingressaram
-                let comeco = tempo
-                tempo += menor
-                let fim = tempo
-
-                //Colocar a tarefa que acabou de ser executada no fim da fila.
-                variavel_removida = list.shift()
-
-                if (input[variavel_removida].dur != 0) {
-                    list.push(variavel_removida)
+                let disponiveis_tr = disponiveis.map(x => `<td>${x}</td>`).join("");
+                tr_eventos += `<tr><th></th>${disponiveis_tr}</tr>`;
+                // encontra primeira tarefa que requer apenas o que eu tenho
+                let prox_executar = quer.findIndex(
+                    (requerimentos, i) => !concluido[i] && requerimentos.every(
+                        (requerimento, j) => requerimento <= disponiveis[j]
+                    )
+                );
+                if (prox_executar == -1) {
+                    // nenhum pode executar, dead lock
+                    break;
+                } else {
+                    concluido[prox_executar] = true;
+                    tem[prox_executar].forEach((tem, i) => disponiveis[i] += tem);
+                    let removidos = quer[prox_executar].map(x => `<td>-${x}</td>`).join("");
+                    let adicionados = tem[prox_executar].map((x, i) => `<td>+${x + quer[prox_executar][i]}</td>`).join("");
+                    tr_eventos += `<tr><th>Tarefa ${prox_executar} Executa</th>${removidos}</tr>`;
+                    tr_eventos += `<tr><th>Tarefa ${prox_executar} Termina</th>${adicionados}</tr>`;
                 }
-
-                indices_tarefas_ingressaram = []
-
-                //Adicionando as tarefas que ingressaram em um vetor vazio.
-                for (let i = 0; i < input.length; i++) {
-                    if (comeco < input[i].ing && fim >= input[i].ing) {
-                        indices_tarefas_ingressaram.push(i)
-                    }
-                }
-                //Ordenando as tarefas por ordem de ingresso
-                indices_tarefas_ingressaram.sort((a, b) => input[a].ing - input[b].ing) //Ordenando não os índices, mas sim os valors dos ingressos
-                list.push(...indices_tarefas_ingressaram)
-                console.log(list)
-
-                if (list.length === 0) {
-                    break
-                }
-
             }
-            console.log(output)
-
-            const qtd_tarefas = input.length
-
-            mostrar_RR(output, qtd_tarefas)
-
+            document.getElementById("output").innerHTML = `<thead><tr><th>Evento</th>${header_recursos}</tr></thead><tbody>${tr_eventos}</tbody>`;
         }
-
+        document.addEventListener("DOMContentLoaded", executa);
     </script>
 </head>
 
 <body>
-    <table>
-        <thead>
-            <tr> <!-- linha inteira-->
-                <th> <!-- uma célula do cabeçalho do input-->
-                    Ingresso |
-                </th>
-                <th>
-                    Duração |
-                </th>
-                <th>
-                    botões
-                </th>
-            </tr>
-        </thead>
-        <tbody id="tarefas">
-            <tr>
-                <td> <!-- td ou th podemos colocarmos ambos no mesmo lugar a única diferença é a estilização do th-->
-                    <input value="0" type="number"> <!-- th é uma célula e o td também -->
-                </td>
-                <td>
-                    <input value="10" type="number"> <!-- th é uma célula e o td também -->
-                </td>
-                <td>
-                    <button onclick="apagar_linha(this)">
-                        -
-                    </button>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <input value="4" type="number"> <!-- th é uma célula e o td também -->
-                </td>
-                <td>
-                    <input value="13" type="number"> <!-- th é uma célula e o td também -->
-                </td>
-                <td>
-                    <button onclick="apagar_linha(this)">
-                        -
-                    </button>
-                </td>
-            </tr>
-        </tbody>
-        <tfoot>
-            <tr>
-                <td>
-                    <button onclick="criar_linha()">
-                        <!-- estamos chamando a função usando o onclick. Dentro do onclick usamos js normal, qualquer comando-->
-                        Adicionar tarefa
-
-                    </button>
-                </td>
-                <td>
-
-                </td>
-                <td>
-
-                </td>
-            </tr>
-        </tfoot>
-    </table>
-    <button onclick="mostrar_resultado_RR()">
-        executar
-    </button>
-    <br><label for="quantum">quantum</label><br><input id ="quantum" type="number" value="1" placeholder="quantum">  <!-- atributos sempre são strings, ou seja, sempre vêm dentro de aspas sem exceções-->
-    <div id="output"> 
+    <div>
+        <label for="quant_tarefas">Número de tarefas</label>
         <br>
-        <!--<table class="res">
-        <thead>
-            <tr>
-                <th>
-
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>
-                    t1
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    t2
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    t3
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    -->
+        <input id="quant_tarefas" type="number" oninput="refaz_inputs()" value="3">
+        <br>
+        <label for="quant_recursos">Número de recursos</label>
+        <br>
+        <input id="quant_recursos" type="number" oninput="refaz_inputs()" value="4">
+        <br>
+        <br>
+        <label for="recursos_disp"><b>Recursos disponíveis:</b></label>
+        <table id="recursos_disp">
+            <thead>
+                <tr id="recursos_trhead">
+                    <th>A</th>
+                    <th>B</th>
+                    <th>C</th>
+                    <th>D</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr id="recursos_trbody">
+                    <td><input type="number" value="2" oninput="executa()"></td>
+                    <td><input type="number" value="1" oninput="executa()"></td>
+                    <td><input type="number" value="0" oninput="executa()"></td>
+                    <td><input type="number" value="0" oninput="executa()"></td>
+                </tr>
+            </tbody>
+        </table>
+        <br>
+        <label for="matriz_tem"><b>Matriz de Alocação Corrente</b></label>
+        <table id="matriz_tem">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>A</th>
+                    <th>B</th>
+                    <th>C</th>
+                    <th>D</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th>0</th>
+                    <td><input type="number" value="0" oninput="executa()"></td>
+                    <td><input type="number" value="0" oninput="executa()"></td>
+                    <td><input type="number" value="1" oninput="executa()"></td>
+                    <td><input type="number" value="0" oninput="executa()"></td>
+                </tr>
+                <tr>
+                    <th>1</th>
+                    <td><input type="number" value="2" oninput="executa()"></td>
+                    <td><input type="number" value="0" oninput="executa()"></td>
+                    <td><input type="number" value="0" oninput="executa()"></td>
+                    <td><input type="number" value="1" oninput="executa()"></td>
+                </tr>
+                <tr>
+                    <th>2</th>
+                    <td><input type="number" value="0" oninput="executa()"></td>
+                    <td><input type="number" value="1" oninput="executa()"></td>
+                    <td><input type="number" value="2" oninput="executa()"></td>
+                    <td><input type="number" value="0" oninput="executa()"></td>
+                </tr>
+            </tbody>
+        </table>
+        <br>
+        <label for="matriz_quer"><b>Matriz de requisições</b></label>
+        <table id="matriz_quer">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>A</th>
+                    <th>B</th>
+                    <th>C</th>
+                    <th>D</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th>0</th>
+                    <td><input type="number" value="2" oninput="executa()"></td>
+                    <td><input type="number" value="0" oninput="executa()"></td>
+                    <td><input type="number" value="0" oninput="executa()"></td>
+                    <td><input type="number" value="1" oninput="executa()"></td>
+                </tr>
+                <tr>
+                    <th>1</th>
+                    <td><input type="number" value="1" oninput="executa()"></td>
+                    <td><input type="number" value="0" oninput="executa()"></td>
+                    <td><input type="number" value="1" oninput="executa()"></td>
+                    <td><input type="number" value="0" oninput="executa()"></td>
+                </tr>
+                <tr>
+                    <th>2</th>
+                    <td><input type="number" value="2" oninput="executa()"></td>
+                    <td><input type="number" value="1" oninput="executa()"></td>
+                    <td><input type="number" value="0" oninput="executa()"></td>
+                    <td><input type="number" value="0" oninput="executa()"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div>
+        <table id="output"></table>
     </div>
 </body>
 
