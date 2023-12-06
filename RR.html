@@ -126,25 +126,24 @@
         function executar_RR(tarefas) {
             const input = tarefas
 
-            //Variável que vai guardar o índice da tarefa de menor ingresso
-            let indice_menor = 0;
-
-            for (let i = 1; i < input.length; i++) {
-                if (input[i].ing < input[indice_menor].ing) {
-                    indice_menor = i;
-                }
-            }
-            if(input[indice_menor].ing != 0){
-                alert("Digite o ingrensso com valor 0!")
-                return []         
-            }
             //O tempo máximo que cada tarefa pode ser executada por vez
             const quantum = Number(document.getElementById("quantum").value) //document.getElementById("quantum") está retornando um objeto que representa o input no documento... e esse objeto é "mágico" no sentido de que não podemos criar essa função, assim como não conseguimos criar uma função console.log//poderia ser const quantum = document["getElementById"]("quantum"), ou com o . pegamos uma propriedade de um objeto, sendo essa propriedade uma função, um número, um outro objeto(quando temos um vetor dentro de um vetor)
             //[0][0] nesse caso primeiro colchete define um array, e o segundo define o valor do posição 0(nesse caso, nos retornaria 0), agora {"dur": 3}["dur"] nesse caso a gente tá definindo um objeto com a propriedade duração pelos {} e com um valor 3 pelos : . E estamos acessando essa valor via []. também poderíamos passar {"dur+!"}[]
             //Os itens de um array são guardados na propriedade daquele objeto, a propriedade 0 de um vetor [a, b, c] é o a, asim como document tem a propriedade getElementById, arrays tem propriedades que é o indíce dela.
+
             //A fila atual de tarefas que muda ao longo da execução
             let list = []
-            list.push(indice_menor) //colocando a primeira tarfa a ser executa na lista que ordena as tarefas a serem executadas
+            for (let i = 0; i < input.length; i++) {
+                if (input[i].ing == 0) {
+                    list.push(i) //colocando as primeira tarefas a serem executadas
+                }
+            }
+            if (list.length == 0) {
+                alert("Digite o ingrensso com valor 0!")
+                return []         
+            }
+
+            // coloca as outras tarefas que também ingressam
 
             let tempo = 0
 
@@ -166,8 +165,8 @@
                 //Definindo o avanço do tempo que vai útil pra ser usado para identificar as tarefas que ingressaram
                 let comeco = tempo
                 tempo += menor
-                tempo += troca
                 let fim = tempo
+                tempo += troca
 
                 //Colocar a tarefa que acabou de ser executada no fim da fila.
                 variavel_removida = list.shift()
@@ -177,6 +176,7 @@
                 }else{
                     const tempo_vida = fim - input[variavel_removida].ing
                     const tempo_espera = tempo_vida - input[variavel_removida].dur2
+                    console.log({tarefa: variavel_removida, fim: fim, comeco: input[variavel_removida].ing, tempo_vida});
                     
                     total_tempo_vida += tempo_vida
                     total_tempo_espera += tempo_espera
@@ -192,7 +192,7 @@
                 }
                 //Ordenando as tarefas por ordem de ingresso
                 indices_tarefas_ingressaram.sort((a, b) => input[a].ing - input[b].ing) //Ordenando não os índices, mas sim os valors dos ingressos
-                list.push(...indices_tarefas_ingressaram)
+                list.unshift(...indices_tarefas_ingressaram)
                 console.log(list)
 
                 if (list.length === 0) {
