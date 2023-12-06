@@ -107,9 +107,9 @@
             }
 
             // lê o vetor de recursos disponíveis
-            let recursos_tr = document.getElementById("recursos_tr");
+            let recursos_trbody = document.getElementById("recursos_trbody");
             // para cada célula
-            let disponiveis = Array.from(recursos_tr.children).map(
+            let disponiveis = Array.from(recursos_trbody.children).map(
                 // obtem o valor do primeiro elemento (o input)
                 x => Number(x.firstElementChild.value)
             );
@@ -222,7 +222,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr id="recursos_tr">
+                <tr id="recursos_trbody">
                     <td><input type="number" value="2" oninput="executa()"></td>
                     <td><input type="number" value="1" oninput="executa()"></td>
                     <td><input type="number" value="0" oninput="executa()"></td>
